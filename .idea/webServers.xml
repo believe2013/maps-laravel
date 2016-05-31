@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="cef4ae3b-2db0-4694-90ad-4ee7f10a7215" name="map.chiligroup" url="http://map.chiligroup.ru">
+        <fileTransfer host="map.chiligroup.ru" port="21" password="dfdddfe9dfffdff3df9cdff7df9fdfd7" username="chiligroup_map">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="21" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

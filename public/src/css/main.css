@@ -1,0 +1,12 @@
+html, body { margin: 0; padding: 0; }
+html, body, #map { width: 100%; height: 100%; }
+
+.list { list-style: none outside; margin: 0; padding: 0;}
+.list li { padding-bottom: 10px; }
+.list a { color: #207697; }
+.list a:hover { color: #28B8F0; text-decoration: none; }
+
+#filter .checkbox{
+    display: inline-block;
+    margin-right: 10px;
+}
