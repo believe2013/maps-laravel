@@ -24,7 +24,7 @@
             <ul class="nav navbar-nav navbar-right">
                 <li><a>Статус: администратор</a></li>
                 <li class="dropdown">
-                    <a href="http://fezvrasta.github.io/bootstrap-material-design/bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">{{Auth::user()->name}}
+                    <a href="#" data-target="#" class="dropdown-toggle" data-toggle="dropdown"><i class="material-icons" style="margin: -4px 10px 0 16px;">person</i> {{Auth::user()->name}}
                         <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         {{--<li><a href="javascript:void(0)">Профиль</a></li>

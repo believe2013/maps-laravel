@@ -115,9 +115,27 @@ class AppController extends Controller
 		if ($request->hasFile('order-file'))
 		{
 			$file = $request->file('order-file');
+
 			$ext = $file->getClientOriginalExtension();
 			if($ext != 'csv')
 				return redirect()->back()->with(['message-error' => 'Файл формата '.$ext. ' не соответствует данному приложению.']);
+
+
+			// если кодировка windows 1251
+			$arFile = file($file);
+			//dd($arFile);
+			if(mb_detect_encoding($arFile[0], 'ASCII,UTF-8,ISO-8859-15') != 'UTF-8'){
+				$f = fopen (storage_path('app/cards-one/order-map.'.$ext), "w");
+				foreach ($arFile as $k => $arLine){
+					$tmpLine = iconv("WINDOWS-1251", "UTF-8", $arLine);
+					fwrite($f, trim($tmpLine)."\r\n");
+				}
+				fclose($f);
+				return redirect()->back()->with(['message' => 'Добавлены новые объекты (win-1251)']);
+			}
+
+
+			// если кодировка utf-8
 			$filename = 'order-map.'.$ext;
 
 			// move the file to correct location
@@ -125,8 +143,9 @@ class AppController extends Controller
 				mkdir(storage_path('app/cards-one'), 0777, true);
 			}
 			$file->move(storage_path('app/cards-one'), $filename);
+			return redirect()->back()->with(['message' => 'Добавлены новые объекты (utf-8)']);
 		}
-		return redirect()->back();
+		return redirect()->back()->with(['message-error' => 'Загруженные данные не являются файлом.']);
 	}
 	
 	

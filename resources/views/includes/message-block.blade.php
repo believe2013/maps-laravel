@@ -11,10 +11,10 @@
 @endif
 
 @if(Session::has('message'))
-    <div class="row">
-        <div class="col-md-4 col-md-offset-4 success">
-            {{Session::get('message')}}
-        </div>
+    <div class="alert alert-dismissible alert-success">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <h4>Информация!</h4>
+        <h5>{{Session::get('message')}}</h5>
     </div>
 @endif
 

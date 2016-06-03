@@ -12,7 +12,7 @@
             <fieldset>
                 <legend>Загрузить файл с заказами</legend>
                 <blockquote style="border-left: 5px solid #f44336;">
-                    <p>К загрузке принимаются файлы формата <span class="text-danger">CSV с кодировкой UTF-8</span></p>
+                    <p>К загрузке принимаются файлы формата <span class="text-danger">CSV</span></p>
                     {{--<small>Someone famous in <cite title="Source Title">Source Title</cite></small>--}}
                 </blockquote>
                 <div class="form-group">
