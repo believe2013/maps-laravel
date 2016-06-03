@@ -28,7 +28,7 @@ class AppController extends Controller
 
 		if(!file_exists(storage_path('app/cards-one/order-map.csv' ))){
 			$user = Auth::user();
-			return view('app.file', ['user' => $user, 'nomap' => 'Еще не загружено ни одного файла для отображения карты.']);
+			return view('app.index', ['user' => $user, 'nomap' => 'Еще не загружено ни одного файла для отображения карты.']);
 		}
 
 		$f = fopen(storage_path('app/cards-one/order-map.csv'), 'r') or die('Ошибка загрузки файла заказов.');
@@ -54,8 +54,6 @@ class AppController extends Controller
 		}
 		fclose($f);
 
-		//dd($result);
-
 		$coordinates = Coordinates::all();
 		if(count($coordinates)){
 			foreach ($coordinates as $k => $v){
@@ -63,8 +61,6 @@ class AppController extends Controller
 			}
 		}else
 			$arCoord = [];
-
-		//$start = microtime(true);
 
 
 		foreach ($result as $key => $value){
@@ -74,10 +70,6 @@ class AppController extends Controller
 				}
 			}
 		}
-		//echo 'Время выполнения скрипта: '.(microtime(true) - $start).' сек.';
-		//exit();
-
-		//dd($result);
 
 		// Уникальный массив ресторанов
 		// Запись транслита ресторана в массив
@@ -115,7 +107,7 @@ class AppController extends Controller
 
 
 		$user = Auth::user();
-		return view('app.file', ['user' => $user, 'result' => $result, 'filter' => $filterRes]);
+		return view('app.index', ['user' => $user, 'result' => $result, 'filter' => $filterRes]);
 	}
 
 	public function getAppFile(Request $request)
@@ -154,9 +146,6 @@ class AppController extends Controller
 		$api = new \Yandex\Geo\Api();
 
 		$address = $request['address'];
-		//$id = $request['id'];
-
-		//return $address;
 
 
 		$api->setQuery('Санкт-Петербург, '.$address);
