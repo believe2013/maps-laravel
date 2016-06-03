@@ -7,7 +7,7 @@
     <script src="{{ asset('src/js/colorpicker/eye.js') }}"></script>
     <script src="{{ asset('src/js/colorpicker/utils.js') }}"></script>
     <div class="well bs-component">
-        <form class="form-horizontal">
+        <form class="form-horizontal" method="post" action="{{route('app-file')}}" enctype="multipart/form-data">
             <fieldset>
                 <legend>Загрузить файл с заказами</legend>
 
@@ -16,8 +16,9 @@
 
                     <div class="col-md-10">
                         <input type="text" readonly="" class="form-control" placeholder="Обзор ...">
-                        <input type="file" id="inputFile" multiple="">
+                        <input type="file" id="inputFile" name="order-file">
                     </div>
+                    {{csrf_field()}}
                 </div>
                 <div class="form-group">
                     <div class="col-md-10 col-md-offset-2">
@@ -37,6 +38,19 @@
             height: 500px;
         }
     </style>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Загрузка объектов ...</h3>
+        </div>
+        <div class="panel-body">
+            <br>
+            <div class="progress progress-striped active" style="height: 10px;">
+                <div class="progress-bar" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="panel panel-primary">
         <div class="panel-heading">
             <h3 class="panel-title">Карта с заказами</h3>
@@ -51,30 +65,16 @@
 
                 <div class="row">
                     <div class="col-md-12">
-                        <? $filter_ar = []; ?>
-                        @foreach($result as $val)
-                            <?$filter_ar[] = $val[3];?>
-                        @endforeach
                         <div id="filter">
-                            <?$checkbox_ar = array_unique($filter_ar);?>
-                            @foreach($checkbox_ar as $res)
-                                @foreach($result as $res_color)
-                                    @if($res_color[3] == $res)
-                                        <?$color_filter = $res_color[6];?>
-                                        @break
-                                    @endif
-                                @endforeach
-                                @if($res)
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" id='{{\App\Helpers\TranslitHelp::get($res)}}' checked=true> {{$res}}
-                                        </label>
-                                        <div class="colorSelector {{\App\Helpers\TranslitHelp::get($res)}}" data-restoran="{{\App\Helpers\TranslitHelp::get($res)}}"><div style="background-color: {{$color_filter}}"></div></div>
-                                    </div>
-                                @endif
+                            @foreach($filter as $val)
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id='{{$val[1]}}' checked=true> {{$val[0]}}
+                                    </label>
+                                    <div class="colorSelector {{$val[1]}}" data-restoran="{{$val[1]}}"><div style="background-color: {{$val[2]}}"></div></div>
+                                </div>
                             @endforeach
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -82,11 +82,50 @@
         </div>
     </div>
 
+
+
+
     <script src="//api-maps.yandex.ru/2.1/?lang=ru_RU&mode=debug"></script>
 
     <script>
 
         ymaps.ready(function () {
+
+            // массив с объектами
+            var resultGeo = [];
+            <?$i = 0;?>
+            @foreach($result as $res)
+                <?
+                if($i == 2000)
+                    break;
+                ?>
+                var geoObj = {
+                    'address'   : '{{$res[0]}}',
+                    'price'     : {{$res[1]}},
+                    'date'      : '{{$res[2]}}',
+                    'name'      : '{{$res[3]}}',
+                    'nameEn'    : '{{$res[4]}}',
+                    'color'     : '{{$res[5]}}'
+                };
+                resultGeo.push(geoObj);
+                <?$i++?>
+            @endforeach
+            //console.log(resultGeo.length);
+            /*for(var i = 0; i < resultGeo.length; i++){
+                var address = resultGeo[i].address;
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{route('get-coord')}}',
+                        data: 'address='+address+'&_token={{ csrf_token() }}',
+                        success: function(data){
+                            console.log(data);
+                            //$('.results').html(data);
+                        }
+                    });
+            }*/
+
+            //console.log(result);
 
             // Иниацилизация карты
             var myMap = new ymaps.Map('map', {
@@ -108,8 +147,8 @@
                         if($('.alert.alert-dismissible.alert-info').length == 0)
                             $('body').append('<div class="alert alert-dismissible alert-info" style="position: fixed; z-index: 99999; top:0%; left:0%; width: 320px;"><button type="button" class="close" data-dismiss="alert">×</button><b>ВКЛЮЧЕН точечный режим отображения заказов.</b></div>');
                         /*setTimeout(function () {
-                            $('.alert.alert-dismissible.alert-info').fadeOut(1400);
-                        }, 2000);*/
+                         $('.alert.alert-dismissible.alert-info').fadeOut(1400);
+                         }, 2000);*/
                     }else{
                         objectManager.options.set({
                             groupByCoordinates: false
@@ -226,7 +265,7 @@
             // на событие клика по кластерам повесим формирование данных
             objectManager.clusters.events.add('click', function (e) {
                 var clusterId = e.get('objectId'),
-                cluster = objectManager.clusters.getById(clusterId);
+                        cluster = objectManager.clusters.getById(clusterId);
 
                 //console.log(cluster);
 
@@ -316,43 +355,94 @@
 
             ////////////////////////////////////
 
+            var objectManagerGeo = [];
+            /*for(var i = 0; i < 500; i++){
+                var objManager  = {
+                    "type": "Feature",
+                        "id": i,
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": []
+                    },
+                    "properties": {
+                        "placemarkId": i,
+                        "restoran": resultGeo[i].nameEn,
+                        "nameRestoran": resultGeo[i].name,
+                        "clusterCaption": resultGeo[i].address + ' | №' + i,
+                        "clusterHintContent": 'Группа объектов',
+                        "hintContent": resultGeo[i].address,
+                        'iconContent': '1',
+                        'balloonContentHeader': resultGeo[i].address,
+                        'balloonContentBody': '<ul><li>1 заказ</li><li>1 клиент</li><li>Сумма заказа: ' + resultGeo[i].price + ' рублей</li><li>Ресторан: ' + resultGeo[i].name +'</li></ul>',
+                        'balloonContentFooter': 'дата заказа: ' + resultGeo[i].data,
+                        'price': resultGeo[i].price
+                        },
+                    "options": {
+                        "preset": "islands#icon",
+                        "iconColor": resultGeo[i].color
+                    }
+                };
+                console.log(i);
+                var objGeocode = ymaps.geocode('Санкт-Петербург, ' + resultGeo[i].address, {results: 1});
+                objGeocode.then(
+                        function (res) {
+                            // Выведем в консоль данные, полученные в результате геокодирования объекта.
+                            console.log(res.geoObjects.get(0).geometry.getCoordinates());
+                        },
+                        function (err) {
+                            console.log(err);
+                        }
+                );
+            }*/
+
+
+
+
+
+                /*for(var i = 500; i < 1000; i++){
+                    var objManager  = {
+                        "type": "Feature",
+                        "id": i,
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": []
+                        },
+                        "properties": {
+                            "placemarkId": i,
+                            "restoran": resultGeo[i].nameEn,
+                            "nameRestoran": resultGeo[i].name,
+                            "clusterCaption": resultGeo[i].address + ' | №' + i,
+                            "clusterHintContent": 'Группа объектов',
+                            "hintContent": resultGeo[i].address,
+                            'iconContent': '1',
+                            'balloonContentHeader': resultGeo[i].address,
+                            'balloonContentBody': '<ul><li>1 заказ</li><li>1 клиент</li><li>Сумма заказа: ' + resultGeo[i].price + ' рублей</li><li>Ресторан: ' + resultGeo[i].name +'</li></ul>',
+                            'balloonContentFooter': 'дата заказа: ' + resultGeo[i].data,
+                            'price': resultGeo[i].price
+                        },
+                        "options": {
+                            "preset": "islands#icon",
+                            "iconColor": resultGeo[i].color
+                        }
+                    };
+
+                    var objGeocode = ymaps.geocode('Санкт-Петербург, ' + resultGeo[i].address, {results: 1});
+                    objGeocode.then(
+                            function (res) {
+                                // Выведем в консоль данные, полученные в результате геокодирования объекта.
+                                console.log(res.geoObjects.get(0).geometry.getCoordinates());
+                            },
+                            function (err) {
+                                console.log(err);
+                            }
+                    );
+                }*/
+
 
             objectManager.add(
                     {
                         "type": "FeatureCollection",
-                        "features": [
-                                <?$i = 0?>
-                                @foreach($result as $res)
-                            {
-                                "type": "Feature",
-                                "id": {{$i}},
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [{{$res[4]}}]
-                                },
-                                "properties": {
-                                    //"balloonContent": "Содержимое балуна",
-                                    "placemarkId": {{$i}},
-                                    "restoran": "{{\App\Helpers\TranslitHelp::get($res[3])}}",
-                                    "nameRestoran": "{{$res[3]}}",
-                                    "clusterCaption": "{{$res[0]}} | №{{$i}}",
-                                    "clusterHintContent": 'Группа объектов',
-                                    "hintContent": "{{$res[0]}}",
-                                    'iconContent': '1',
-                                    'balloonContentHeader': '{{$res[0]}}',
-                                    'balloonContentBody': '<ul><li>1 заказ</li><li>1 клиент</li><li>Сумма заказа: {{$res[1]}} рублей</li><li>Ресторан: {{$res[3]}}</li> </ul>',
-                                    'balloonContentFooter': 'дата заказа: {{$res[2]}}',
-                                    'price': {{$res[1]}}
-                                },
-                                "options": {
-                                    "preset": "islands#icon",
-                                    "iconColor": "{{$res[6]}}"
-                                }
-                            }
-                            <?=($i !== (count($result) - 1)) ? ',' : '' ?>
-                            <?$i++?>
-                            @endforeach
-                        ]
+                        "features": objectManagerGeo
                     }
             );
 
@@ -380,9 +470,9 @@
 
             /*console.log(objectManager.clusters.getAll());
 
-            for (geometry in objectManager.clusters.getAll()){
-                console.log(geometry);
-            }*/
+             for (geometry in objectManager.clusters.getAll()){
+             console.log(geometry);
+             }*/
 
 
 
@@ -411,26 +501,26 @@
             objectManager.objects.options.set('preset', 'islands#grayIcon');
 
             // Задание цвета
-            @foreach($checkbox_ar as $res)
-                $('.colorSelector.{{\App\Helpers\TranslitHelp::get($res)}}').ColorPicker({
-                    color: '#0000ff',
-                    onShow: function (colpkr) {
-                        $(colpkr).fadeIn(500);
-                        return false;
-                    },
-                    onHide: function (colpkr) {
-                        $(colpkr).fadeOut(500);
-                        return false;
-                    },
-                    onChange: function (hsb, hex, rgb) {
-                        $('.colorSelector.{{\App\Helpers\TranslitHelp::get($res)}} div').css('backgroundColor', '#' + hex);
-                    },
-                    onSubmit: function (hsb, hex, rgb) {
-                        //$('.colorSelector.{{\App\Helpers\TranslitHelp::get($res)}} div').css('backgroundColor', '#' + hex);
-                        //objectManager.objects.options.set('preset', 'islands#grayIcon');
-                        settColor('#' + hex, '{{\App\Helpers\TranslitHelp::get($res)}}' );
-                    }
-                });
+            @foreach($filter as $res)
+                $('.colorSelector.{{$res[0]}}').ColorPicker({
+                color: '#0000ff',
+                onShow: function (colpkr) {
+                    $(colpkr).fadeIn(500);
+                    return false;
+                },
+                onHide: function (colpkr) {
+                    $(colpkr).fadeOut(500);
+                    return false;
+                },
+                onChange: function (hsb, hex, rgb) {
+                    $('.colorSelector.{{$res[0]}} div').css('backgroundColor', '#' + hex);
+                },
+                onSubmit: function (hsb, hex, rgb) {
+                    //$('.colorSelector.{{$res[0]}} div').css('backgroundColor', '#' + hex);
+                    //objectManager.objects.options.set('preset', 'islands#grayIcon');
+                    settColor('#' + hex, '{{$res[0]}}' );
+                }
+            });
             @endforeach
 
 
@@ -443,9 +533,9 @@
                         //objectManager.objects
                         //console.log(objectId);
                         /*objectManager.objects.options.set({
-                            preset: 'islands#grayClusterIcons',
-                            geoObjectIconColor: col
-                        });*/
+                         preset: 'islands#grayClusterIcons',
+                         geoObjectIconColor: col
+                         });*/
                         //myMap.geoObjects.objectManager.setObjectOptions({'iconColor': col});
                         //objectManager.objects.options.set({'iconColor': col});
                         //objectManager.objects.setObjectOptions(objectManager.objects.getById(object.id),{'iconColor': col});
@@ -472,7 +562,7 @@
 
 
                         /*console.log(object);
-                        console.log(col);*/
+                         console.log(col);*/
 
                     }
 
@@ -485,62 +575,62 @@
 
 
             /*var arObj = [];
-            var i = 0;
-            objectManager.clusters.each(function (cluster) {
-                var test;
-                //console.log(cluster.properties.geoObjects);
-                arObj[i] = new Array;
-                for(var j = 0; j < cluster.properties.geoObjects.length; j++){
-                    test = cluster.id;
-                    var objGeo = {
-                        'id': cluster.properties.geoObjects[j].id,
-                        'color': cluster.properties.geoObjects[j].options.iconColor,
-                        'cluster': cluster.id
-                    };
-                    arObj[i].push(objGeo);
-                }
+             var i = 0;
+             objectManager.clusters.each(function (cluster) {
+             var test;
+             //console.log(cluster.properties.geoObjects);
+             arObj[i] = new Array;
+             for(var j = 0; j < cluster.properties.geoObjects.length; j++){
+             test = cluster.id;
+             var objGeo = {
+             'id': cluster.properties.geoObjects[j].id,
+             'color': cluster.properties.geoObjects[j].options.iconColor,
+             'cluster': cluster.id
+             };
+             arObj[i].push(objGeo);
+             }
 
-                var objGeo = {
-                    'id': 99,
-                    'color': "#fff",
-                    'cluster': test
-                };
-                if(i==0){
-                    arObj[i].push(objGeo);
-                }
-                i++;
-            });
-
-
-            arObj.forEach(function(item, i, arr) {
-                var cache;
-                var is_color;
-                var cluster_id;
-                for(var j = 0; j < item.length; j++){
-                    cluster_id = item[j].cluster;
-                    //если первый
-                    if(j == 0){
-                        cache = item[j].color;
-                    }else{
-                        //если остальные
-
-                        //цвета совпадают
-                        if(cache == item[j].color) {
-                            is_color = item[j].color;
-                        //цвета не совпадают
-                        }else{
-                            is_color = "#FFFFFF";
-                            break;
-                        }
-                    }
-                }
-                //console.log(is_color + ' | ' + cluster_id);
+             var objGeo = {
+             'id': 99,
+             'color': "#fff",
+             'cluster': test
+             };
+             if(i==0){
+             arObj[i].push(objGeo);
+             }
+             i++;
+             });
 
 
-                objectManager.clusters.setClusterOptions(cluster_id, {
-                    iconColor: is_color
-                });
-            });*/
+             arObj.forEach(function(item, i, arr) {
+             var cache;
+             var is_color;
+             var cluster_id;
+             for(var j = 0; j < item.length; j++){
+             cluster_id = item[j].cluster;
+             //если первый
+             if(j == 0){
+             cache = item[j].color;
+             }else{
+             //если остальные
+
+             //цвета совпадают
+             if(cache == item[j].color) {
+             is_color = item[j].color;
+             //цвета не совпадают
+             }else{
+             is_color = "#FFFFFF";
+             break;
+             }
+             }
+             }
+             //console.log(is_color + ' | ' + cluster_id);
+
+
+             objectManager.clusters.setClusterOptions(cluster_id, {
+             iconColor: is_color
+             });
+             });*/
 
 
 

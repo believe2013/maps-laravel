@@ -11,15 +11,15 @@
         <div class="navbar-collapse collapse navbar-responsive-collapse">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="{{ route('app') }}">Приложение</a></li>
-                <li class="dropdown">
-                    <a href="http://fezvrasta.github.io/bootstrap-material-design/bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Управление пользователями
+                {{--<li class="dropdown">
+                    <a href="javascript:void(0)" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Управление пользователями
                         <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <li><a href="javascript:void(0)">Все пользователи</a></li>
                         <li class="divider"></li>
                         <li><a href="javascript:void(0)">Добавить нового пользователя</a></li>
                     </ul>
-                </li>
+                </li>--}}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 <li><a>Статус: администратор</a></li>
@@ -27,8 +27,8 @@
                     <a href="http://fezvrasta.github.io/bootstrap-material-design/bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">{{Auth::user()->name}}
                         <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)">Профиль</a></li>
-                        <li class="divider"></li>
+                        {{--<li><a href="javascript:void(0)">Профиль</a></li>
+                        <li class="divider"></li>--}}
                         <li><a href="{{ route('logout') }}">Выход</a></li>
                     </ul>
                 </li>

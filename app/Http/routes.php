@@ -12,6 +12,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Redis;
+
 Route::get('/',
 	[
 		'uses'	=> 'AppController@getHome',
@@ -33,13 +35,25 @@ Route::get('/logout',
 	]
 );
 
-Route::get('/app',
+Route::any('/app',
 	[
 		'uses'	=> 'AppController@getApp',
 		'as'	=> 'app',
 		'middleware'	=> 'auth'
 	]
 );
+
+Route::any('/app/file',
+	[
+		'uses'	=> 'AppController@getAppFile',
+		'as'	=> 'app-file',
+		'middleware'	=> 'auth'
+	]
+);
+
+
+
+
 
 Route::post('/app/write-color',
 	[
@@ -53,6 +67,14 @@ Route::post('/app/read-color',
 	[
 		'uses'	=> 'AppController@postReadColor',
 		'as'	=> 'read-color',
+		'middleware'	=> 'auth'
+	]
+);
+
+Route::post('/app/get-coord',
+	[
+		'uses'	=> 'AppController@postGetCoordinates',
+		'as'	=> 'get-coord',
 		'middleware'	=> 'auth'
 	]
 );
