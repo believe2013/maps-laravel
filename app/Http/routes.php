@@ -35,7 +35,7 @@ Route::get('/logout',
 	]
 );
 
-Route::any('/app',
+Route::get('/app',
 	[
 		'uses'	=> 'AppController@getApp',
 		'as'	=> 'app',
@@ -43,7 +43,7 @@ Route::any('/app',
 	]
 );
 
-Route::any('/app/file',
+Route::post('/app/file',
 	[
 		'uses'	=> 'AppController@getAppFile',
 		'as'	=> 'app-file',

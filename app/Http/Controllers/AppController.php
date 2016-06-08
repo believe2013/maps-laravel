@@ -23,7 +23,7 @@ class AppController extends Controller
 			return view('login');
 	}
 
-	public function getApp(Request $request)
+	public function getApp()
 	{
 
 		if(!file_exists(storage_path('app/cards-one/order-map.csv' ))){
@@ -45,14 +45,20 @@ class AppController extends Controller
 				//Боремся с некорректными символами в адресе
 				$result[$i][0] = str_replace(['/','\\'], '-', $data[0]);
 
-				//если нету цены
-				if(empty($data[1])){
+				// Цена
+				if(preg_match ( '/^[0-9 ]*/' , trim($data[1]), $matches)){
+					$result[$i][1] = str_replace(' ', '', $matches[0]);
+				}
+				//если цена пустая
+				if(empty($result[$i][1])){
 					$result[$i][1] = 0;
 				}
 			}
 
 		}
 		fclose($f);
+
+		//dd($result);
 
 		$coordinates = Coordinates::all();
 		if(count($coordinates)){

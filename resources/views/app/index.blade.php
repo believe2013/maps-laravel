@@ -371,11 +371,16 @@
                             }
                             var countOrders = j;
                             resSumm += summ; // общая сумма заказов
-                            bContent += '<li>' + '<b>' + countOrders + '</b>' + ' заказов ' +'<b>' + summ + '</b>' + ' рублей ресторан ' + '<strong style="text-transform: uppercase; color:' + resRest[i].color + '">' + resRest[i].nameRestoran + '</strong>' + '</li>';
+                            //формат суммы
+                            summ = summ.toString();
+                            summ = summ.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
+                            bContent += '<li>' + 'ресторан ' + '<strong style="text-transform: uppercase; color:' + resRest[i].color + '">' + resRest[i].nameRestoran + '</strong>,' + ' заказы: ' + '<b>' + countOrders + '</b> на сумму ' +'<b>' + summ + '</b>' + ' руб.</li>';
                         }
 
                         bContent += '</ul>';
-
+                        //формат суммы
+                        resSumm = resSumm.toString();
+                        resSumm = resSumm.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
                         bContent += '<div>' + '<b>' + resSumm + '</b>' + ' рублей общая сумма заказов ' + '</div>';
 
 
@@ -408,7 +413,7 @@
                                 "hintContent": resultGeo[i].address,
                                 'iconContent': '1',
                                 'balloonContentHeader': resultGeo[i].address,
-                                'balloonContentBody': '<ul><li>Заказы: 1</li><li>Клиенты: 1</li><li>Сумма заказа: ' + resultGeo[i].price + ' рублей</li><li>Ресторан: ' + resultGeo[i].name +'</li></ul>',
+                                'balloonContentBody': '<ul><li>Заказы: 1</li><li>Клиенты: 1</li><li>Сумма заказа: ' + resultGeo[i].price.toString().replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ') + ' рублей</li><li>Ресторан: ' + resultGeo[i].name +'</li></ul>',
                                 'balloonContentFooter': 'дата заказа: ' + resultGeo[i].date,
                                 'price': resultGeo[i].price
                             },
