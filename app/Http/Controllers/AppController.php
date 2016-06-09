@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Coordinates;
 use App\Fcolor;
+use App\FileOrder;
 use App\Helpers\TranslitHelp;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use Illuminate\Support\Facades\Auth;
 use Cache;
-
+use Jenssegers\Date\Date;
 
 
 class AppController extends Controller
@@ -110,10 +111,17 @@ class AppController extends Controller
 			}
 		}
 
-
+		Date::setLocale('ru');
+		// Инфа о последнем загруженном файле
+		$file_info = FileOrder::orderBy('id', 'desc')->first();
+		$f_info = [
+			'name' => $file_info->name,
+			'created' => Date::parse($file_info->created_at)->diffForHumans(),
+		];
+		//dd(Date::parse($file_info->created_at)->diffForHumans());
 
 		$user = Auth::user();
-		return view('app.index', ['user' => $user, 'result' => $result, 'filter' => $filterRes]);
+		return view('app.index', ['user' => $user, 'result' => $result, 'filter' => $filterRes, 'file_info' => $f_info]);
 	}
 
 	public function getAppFile(Request $request)
@@ -121,6 +129,8 @@ class AppController extends Controller
 		if ($request->hasFile('order-file'))
 		{
 			$file = $request->file('order-file');
+
+			$nameFile =$file->getClientOriginalName();
 
 			$ext = $file->getClientOriginalExtension();
 			if($ext != 'csv')
@@ -137,6 +147,10 @@ class AppController extends Controller
 					fwrite($f, trim($tmpLine)."\r\n");
 				}
 				fclose($f);
+				// добавление инфы о загруженном файле
+				$fileOrder = new FileOrder();
+				$fileOrder->name = $nameFile;
+				$fileOrder->save();
 				return redirect()->back()->with(['message' => 'Добавлены новые объекты (win-1251)']);
 			}
 
@@ -149,6 +163,10 @@ class AppController extends Controller
 				mkdir(storage_path('app/cards-one'), 0777, true);
 			}
 			$file->move(storage_path('app/cards-one'), $filename);
+			// добавление инфы о загруженном файле
+			$fileOrder = new FileOrder();
+			$fileOrder->name = $nameFile;
+			$fileOrder->save();
 			return redirect()->back()->with(['message' => 'Добавлены новые объекты (utf-8)']);
 		}
 		return redirect()->back()->with(['message-error' => 'Загруженные данные не являются файлом.']);

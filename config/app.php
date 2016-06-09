@@ -52,7 +52,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Europe/Moscow',
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'ru',
 
     /*
     |--------------------------------------------------------------------------
@@ -166,6 +166,7 @@ return [
 		 * Prod
 		 */
 		App\Providers\HelperServiceProvider::class,
+		Jenssegers\Date\DateServiceProvider::class,
 
     ],
 
@@ -222,6 +223,7 @@ return [
 		 * Prod
 		 */
 		'TranslitHelper'     => App\Helpers\TranslitHelp::class,
+		'Date' => Jenssegers\Date\Date::class,
 
     ],
 

@@ -9,7 +9,14 @@
     @include('includes.message-block')
     <div class="well bs-component">
         <form class="form-horizontal" method="post" action="{{route('app-file')}}" enctype="multipart/form-data">
+            <div class="pull-right">
+                <span class="label label-info" style="font-size: 16px;">Версия файла:</span><br><br>
+                <p><b>Название:</b> {{$file_info['name']}}</p>
+                <p><b>Добавлено:</b> {{$file_info['created']}}</p>
+            </div>
+
             <fieldset>
+
                 <legend>Загрузить файл с заказами</legend>
                 <blockquote style="border-left: 5px solid #f44336;">
                     <p>К загрузке принимаются файлы формата <span class="text-danger">CSV</span></p>
