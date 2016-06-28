@@ -44,7 +44,9 @@ class AppController extends Controller
 				$result[$i][$c] = str_replace('"', '', $data[$c]);
 
 				//Боремся с некорректными символами в адресе
-				$result[$i][0] = str_replace(['/','\\'], '-', $data[0]);
+				$cacheAdress = str_replace(['/','\\'], '-', $data[0]);
+				$cacheAdress = str_replace(['"'], '', $cacheAdress);
+				$result[$i][0] = $cacheAdress;
 
 				// Цена
 				if(preg_match ( '/^[0-9 ]*/' , trim($data[1]), $matches)){
@@ -59,7 +61,7 @@ class AppController extends Controller
 		}
 		fclose($f);
 
-		//dd($result);
+		//dd($result[1871]);
 
 		$coordinates = Coordinates::all();
 		if(count($coordinates)){
