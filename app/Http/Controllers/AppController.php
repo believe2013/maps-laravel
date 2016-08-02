@@ -49,8 +49,8 @@ class AppController extends Controller
 				$result[$i][0] = $cacheAdress;
 
 				// Цена
-				if(preg_match ( '/^[0-9 ]*/' , trim($data[1]), $matches)){
-					$result[$i][1] = str_replace(' ', '', $matches[0]);
+				if(preg_match ( '/[0-9]*([^,\d]{0,})[0-9]*/' , str_replace(' ', '',$data[1]), $matches)){
+					$result[$i][1] = str_replace($matches[1], '', $matches[0]);
 				}
 				//если цена пустая
 				if(empty($result[$i][1])){
@@ -61,7 +61,9 @@ class AppController extends Controller
 		}
 		fclose($f);
 
-		//dd($result[1871]);
+		//$ar = ['result' => array(array('Маршала Блюхера пр-кт, дом № 29, кв.16	545	31.07.2016	Академический')), 'i' => '0', 'num' => '1', 'data' => array('Маршала Блюхера пр-кт, дом № 29, кв.16	545	31.07.2016	Академический'), 'c' => '0', 'cacheAdress' => 'Маршала Блюхера пр-кт, дом № 29, кв.16	545	31.07.2016	Академический'))];
+
+		//dd($result);
 
 		$coordinates = Coordinates::all();
 		if(count($coordinates)){
