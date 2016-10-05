@@ -11,8 +11,20 @@
         <form class="form-horizontal" method="post" action="{{route('app-file')}}" enctype="multipart/form-data">
             <div class="pull-right">
                 <span class="label label-info" style="font-size: 16px;">Версия файла:</span><br><br>
-                <p><b>Название:</b> {{$file_info['name']}}</p>
-                <p><b>Добавлено:</b> {{$file_info['created']}}</p>
+                <p><b>Название:</b>
+                    @if(!empty($file_info['name']))
+                        {{$file_info['name']}}
+                    @else
+                        нет
+                    @endif
+                </p>
+                <p><b>Добавлено:</b>
+                    @if(!empty($file_info['created']))
+                        {{$file_info['created']}}
+                    @else
+                        неизвестно
+                    @endif
+                </p>
             </div>
 
             <fieldset>

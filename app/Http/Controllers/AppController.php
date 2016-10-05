@@ -46,6 +46,7 @@ class AppController extends Controller
 				//Боремся с некорректными символами в адресе
 				$cacheAdress = str_replace(['/','\\'], '-', $data[0]);
 				$cacheAdress = str_replace(['"'], '', $cacheAdress);
+				$cacheAdress = str_replace(['+'], '', $cacheAdress);
 				$result[$i][0] = $cacheAdress;
 
 				// Цена
